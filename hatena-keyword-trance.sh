@@ -1,7 +1,17 @@
 #!/bin/sh
-# last updated : 2012/06/01 13:21:51 JST
 #
 # はてなからはてなキーワードを取得してskk辞書に変換するスクリプト。
+#
+# はてなからキーワードリストを受け取り、 hatena-jisyo.cdb という名前で
+# cdb形式の辞書にします。
+# cronに登録して一ヶ月に一回程度回します。
+# これによりSKKでも最新のネットで話題の単語が使えるようになります。
+#
+# *必要なもの。
+# hatena2skk.rb 
+# skkdic-expr と skkdic-sort と skk2cdb
+# sudo apt-get install skktools で導入可能。
+# 
 #
 # 2012年05月20日(日曜日) 15:04:08 JST
 # はてなキーワードcsvファイルが空になっている事に気づいた。
@@ -23,6 +33,8 @@ HATENAKEY_ID="keywordlist_furigana_with_kid.csv"
 TEMPFILE="key.tmp"
 TMPDIC="tmp.skkdic"
 JISYO="SKK-hatena-jisyo"
+HATENA2SKK="~/bin/hatena2skk.rb"
+SKKDIR="~/skk-dic/"
 
 # 標準エラー出力をリダイレクトして渡す。
 # --spider はファイルが存在するかチェックするオプション。実際にdownloadはしない。
@@ -44,10 +56,10 @@ else
 	mv $HATENAKEY $TEMPFILE
 fi
 
-~/bin/hatena2skk.rb $TEMPFILE > $TMPDIC && \
+$HATENA2SKK $TEMPFILE > $TMPDIC && \
 	skkdic-expr $TMPDIC | skkdic-sort > $JISYO && \
 	skk2cdb $JISYO hatena-jisyo.cdb && \
-	mv hatena-jisyo.cdb $JISYO ~/skk-dic/
-gzip -f ~/skk-dic/$JISYO
+	mv hatena-jisyo.cdb $JISYO $SKKDIR
+gzip -f $SKKDIR$JISYO
 rm $TMPDIC $TEMPFILE
 
